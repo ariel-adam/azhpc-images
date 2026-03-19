@@ -25,10 +25,12 @@ dnf config-manager --set-enabled crb 2>/dev/null || dnf config-manager --set-ena
 
 # Development Tools and build dependencies
 dnf groupinstall -y "Development Tools"
+# kernel-rpm-macros may be excluded by exclude=kernel*; install with disableexcludes if needed
+dnf install -y --disableexcludes=main kernel-rpm-macros 2>/dev/null || dnf install -y kernel-rpm-macros 2>/dev/null || true
 dnf install -y numactl numactl-devel libxml2-devel byacc python3-devel python3-setuptools \
   gtk2 atk cairo tcl tk m4 glibc-devel libudev-devel binutils binutils-devel \
   selinux-policy-devel nfs-utils fuse-libs libpciaccess cmake libnl3-devel \
-  libsecret rpm-build make check check-devel lsof kernel-rpm-macros tcsh gcc-gfortran \
+  libsecret rpm-build make check check-devel lsof tcsh gcc-gfortran \
   perl azcopy dos2unix
 
 # environment-modules (RHEL 9 AppStream has it)
