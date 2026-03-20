@@ -10,8 +10,8 @@ export TEST_DIR=$(realpath ../../../../tests)
 export UTILS_DIR=$(realpath ../../../../utils)
 export DISTRIBUTION=rhel9.6
 
-# Component versions from partners/rhel/versions.json
-export COMPONENT_VERSIONS=$(jq -r . ../../versions.json)
+# Component versions from partners/rhel/versions.json (compact JSON for reliable env export)
+export COMPONENT_VERSIONS=$(jq -c . ../../versions.json)
 export MODULE_FILES_DIRECTORY=/usr/share/Modules/modulefiles
 
 # Architecture

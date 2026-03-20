@@ -53,25 +53,29 @@ else
         python3 -m pip install distro
         python3 setup.py install --register-service
     elif [[ $DISTRIBUTION == almalinux9* ]] || [[ $DISTRIBUTION == rocky9* ]] || [[ $DISTRIBUTION == rhel9* ]]; then
-        python3.12 -m ensurepip --upgrade  # Ensures pip is available
-        python3.12 -m pip install --upgrade pip setuptools
-        python3.12 -m pip install distro
-    
-        python3.12 setup.py install --register-service
+        WA_PYTHON=python3
+        command -v python3.12 >/dev/null 2>&1 && WA_PYTHON=python3.12
+        ${WA_PYTHON} -m ensurepip --upgrade  # Ensures pip is available
+        ${WA_PYTHON} -m pip install --upgrade pip
+        # WALinuxAgent 2.9.x setup.py is incompatible with setuptools 70+ (canonicalize_version API).
+        ${WA_PYTHON} -m pip install 'setuptools>=65.0,<69.0'
+        ${WA_PYTHON} -m pip install distro
 
-        systemctl stop waagent
-        systemctl disable waagent
+        ${WA_PYTHON} setup.py install --register-service
 
-        SERVICE_FILE="/usr/lib/systemd/system/waagent.service"
-        BACKUP_FILE="${SERVICE_FILE}.bak.$(date +%F_%T)"
-        # Make a backup first
-        cp "$SERVICE_FILE" "$BACKUP_FILE"
+        if [[ "${WA_PYTHON}" == python3.12 ]]; then
+            systemctl stop waagent
+            systemctl disable waagent
 
-        # Replace the line
-        sed -i 's|^ExecStart=/usr/bin/python3 -u /usr/sbin/waagent -daemon|ExecStart=/usr/bin/python3.12 -u /usr/sbin/waagent -daemon|' "$SERVICE_FILE"
+            SERVICE_FILE="/usr/lib/systemd/system/waagent.service"
+            BACKUP_FILE="${SERVICE_FILE}.bak.$(date +%F_%T)"
+            cp "$SERVICE_FILE" "$BACKUP_FILE"
 
-        systemctl daemon-reexec
-        systemctl enable waagent
+            sed -i 's|^ExecStart=/usr/bin/python3 -u /usr/sbin/waagent -daemon|ExecStart=/usr/bin/python3.12 -u /usr/sbin/waagent -daemon|' "$SERVICE_FILE"
+
+            systemctl daemon-reexec
+            systemctl enable waagent
+        fi
     else 
         python3 setup.py install --register-service
     fi
@@ -91,8 +95,10 @@ else
 fi
 
 if [[ $DISTRIBUTION == almalinux9* ]] || [[ $DISTRIBUTION == rocky9* ]] || [[ $DISTRIBUTION == rhel9* ]]; then
-    write_component_version "WAAGENT" $(python3.12 -u /usr/sbin/waagent --version | head -n 1 | awk -F' ' '{print $1}' | awk -F- '{print $2}')
-    write_component_version "WAAGENT_EXTENSIONS" $(python3.12 -u /usr/sbin/waagent --version | sed '3q;d' | awk -F' ' '{print $4}')
+    WA_PYTHON=python3
+    command -v python3.12 >/dev/null 2>&1 && WA_PYTHON=python3.12
+    write_component_version "WAAGENT" $($WA_PYTHON -u /usr/sbin/waagent --version | head -n 1 | awk -F' ' '{print $1}' | awk -F- '{print $2}')
+    write_component_version "WAAGENT_EXTENSIONS" $($WA_PYTHON -u /usr/sbin/waagent --version | sed '3q;d' | awk -F' ' '{print $4}')
 else
     write_component_version "WAAGENT" $(waagent --version | head -n 1 | awk -F' ' '{print $1}' | awk -F- '{print $2}')
     write_component_version "WAAGENT_EXTENSIONS" $(waagent --version | sed '3q;d' | awk -F' ' '{print $4}')

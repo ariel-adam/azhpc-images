@@ -31,7 +31,7 @@ dnf install -y numactl numactl-devel libxml2-devel byacc python3-devel python3-s
   gtk2 atk cairo tcl tk m4 glibc-devel libudev-devel binutils binutils-devel \
   selinux-policy-devel nfs-utils fuse-libs libpciaccess cmake libnl3-devel \
   libsecret rpm-build make check check-devel lsof tcsh gcc-gfortran \
-  perl azcopy dos2unix
+  perl azcopy dos2unix texinfo
 
 # environment-modules (RHEL 9 AppStream has it)
 dnf install -y environment-modules 2>/dev/null || true

@@ -6,7 +6,8 @@
 # Lookup hierarchy:
 #   1. component.distribution.architecture.<GPU_SKU> (if GPU and SKU are set, e.g., nvidia_v100)
 #   2. component.distribution.architecture
-#   3. component.common
+#   3. component.distribution (e.g. hpcx per-OS blob without arch nesting)
+#   4. component.common
 ############################################################################
 get_component_config(){
     component=$1
@@ -22,6 +23,11 @@ get_component_config(){
     # If no SKU-specific config found, try architecture level
     if [[ "$config" = "null" ]]; then
         config=$(jq -r '."'"${component}"'"."'"${DISTRIBUTION}"'"."'"${ARCHITECTURE}"'"' <<< "${COMPONENT_VERSIONS}")
+    fi
+
+    # Distribution-level config (partners/rhel/versions.json uses e.g. hpcx.rhel9.6, not hpcx.rhel9.6.x86_64)
+    if [[ "$config" = "null" ]]; then
+        config=$(jq -r '."'"${component}"'"."'"${DISTRIBUTION}"'"' <<< "${COMPONENT_VERSIONS}")
     fi
     
     # If still null, fall back to common

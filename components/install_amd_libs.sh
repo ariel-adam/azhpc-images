@@ -20,7 +20,8 @@ download_and_verify $AOCL_DOWNLOAD_URL $AOCL_SHA256
 tar -xvf ${AOCL_TARBALL}
 
 pushd ${AOCL_FOLDER}
-./install.sh -t amd -l blis fftw libflame -i lp64
+# AOCL installer prompts on overwrite; feed confirmation for non-interactive image builds.
+yes yes | ./install.sh -t amd -l blis fftw libflame -i lp64
 cp -r amd/${AOCL_VERSION}/aocc/* ${INSTALL_PREFIX}
 popd
 
@@ -39,7 +40,7 @@ setenv          AMD_FFTW_INCLUDE  ${INSTALL_PREFIX}/include
 EOF
 
 # Create symlinks for modulefiles
-ln -s ${AMD_MODULE_FILES_DIRECTORY}/aocl-${AOCL_VERSION} ${AMD_MODULE_FILES_DIRECTORY}/aocl
+ln -sf ${AMD_MODULE_FILES_DIRECTORY}/aocl-${AOCL_VERSION} ${AMD_MODULE_FILES_DIRECTORY}/aocl
 write_component_version "AOCL" ${AOCL_VERSION}
 
 # Install AMD Optimizing C/C++ and Fortran Compilers
